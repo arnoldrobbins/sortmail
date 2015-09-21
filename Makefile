@@ -16,3 +16,6 @@ html: sortmail.html
 
 sortmail.html: $(TEXISOURCE)
 	makeinfo --no-split --html $(TEXISOURCE)
+
+clean:
+	rm -fr sortmail.pdf sortmail.t2p sortmail.texi
