@@ -35,6 +35,8 @@ BEGIN {
 	Debug = 0
 	MessageNum = 0
 	Duplicates = 0
+	
+	body = ""
 }
 
 {
@@ -43,32 +45,42 @@ BEGIN {
 		In_header = TRUE
 		MessageNum++
 		header_line = 1
-		body_line = 1
-		Header[MessageNum, header_line++] = Line
+		Header[MessageNum][header_line++] = Line
+		if (MessageNum > 1) {
+			Body[MessageNum-1] = body
+		}
+		body_line = 0
+		body = ""
 	} else if (In_header) {
 		if (Line ~ /^$/) {
 			In_header = FALSE
 		}
-		Header[MessageNum, header_line++] = Line
-	} else
-		Body[MessageNum, body_line++] = Line
+		Header[MessageNum][header_line++] = Line
+	} else {
+		if (body_line == 0)
+			body = Line
+		else
+			body = body "\n" Line
+		body_line++
+	}
 }
 
 END {
+	Body[MessageNum] = body
 	for (i = 1; i <= MessageNum; i++) {
-		for (j = 1; (i, j) in Header; j++) {
-			if (Header[i, j] ~ /^[Dd]ate: /) {
-				Date[i] = compute_date(Header[i, j])
-			} else if (Header[i, j] ~ /^[Ss]ubject: /) {
-				subj_line = Header[i, j]
-				for (k = j + 1; (i, k) in Header && Header[i, k] ~ /^[[:space:]]/; k++)
-					subj_line = subj_line "\n" Header[i, k]
+		for (j = 1; j in Header[i]; j++) {
+			if (Header[i][j] ~ /^[Dd]ate: /) {
+				Date[i] = compute_date(Header[i][j])
+			} else if (Header[i][j] ~ /^[Ss]ubject: /) {
+				subj_line = Header[i][j]
+				for (k = j + 1;  k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
+					subj_line = subj_line "\n" Header[i][k]
 				Subject[i] = canonacalize_subject(subj_line)
-			} else if (Header[i, j] ~ /^[Mm]essage-[Ii][Dd]: */) {
-				message_id_line = Header[i, j]
+			} else if (Header[i][j] ~ /^[Mm]essage-[Ii][Dd]: */) {
+				message_id_line = Header[i][j]
 				if (tolower(message_id_line) ~ /^message-id: *$/) {
 					# line is only the header name, get the next line
-					message_id_line = message_id_line " " Header[i, j+1]
+					message_id_line = message_id_line " " Header[i][j+1]
 				}
 				line = tolower(message_id_line)
 				split(line, linefields)
@@ -148,10 +160,9 @@ END {
 	}
 	for (i = 1; i <= MessageNum; i++) {
 		k = Thread[SortedThread[i]]
-		for (j = 1; (k, j) in Header; j++)
-			print Header[k, j]
-		for (j = 1; (k, j) in Body; j++)
-			print Body[k, j]
+		for (j = 1; j in Header[k]; j++)
+			print Header[k][j]
+		print Body[k]
 	}
 }
 

@@ -1,3 +1,9 @@
+2015-09-21         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Speed up processing by building the body
+	as one string and using real multidimensonal arrays. Other
+	minor edits. Bump to edition 1.0.
+
 2015-05-07         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* Makefile, sortmail.twjr, texinfo.tex, sortmail.awk:
