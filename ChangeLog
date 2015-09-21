@@ -1,0 +1,4 @@
+2015-05-07         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* Makefile, sortmail.twjr, texinfo.tex, sortmail.awk:
+	Initial versions.  Commit to git on 2015-09-21.

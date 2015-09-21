@@ -1,0 +1,1007 @@
+\input texinfo   @c -*-texinfo-*-
+@c vim: filetype=texinfo tabstop=4
+@c %**start of header (This is for running Texinfo on a region.)
+@setfilename sortmail.info
+@settitle Sortmail
+@c %**end of header (This is for running Texinfo on a region.)
+
+@c Change how xref titles are quoted.
+@dquotexrefs
+@c And let braces in index entries work.
+@allowindexbraces
+@ifclear FORPRINT
+@pdflinkcolor
+@urllinkcolor
+@hideurls
+@end ifclear
+
+@c The following information should be updated here only!
+@c This sets the edition of the document.
+
+@c These apply across the board.
+@set UPDATE-MONTH April, 2015
+@set EDITION 0.9
+
+@set TITLE Sortmail: A Program To Sort Mailboxes
+@set SHORTTITLE Sortmail
+
+@iftex
+@set DOCUMENT book
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end iftex
+@ifhtml
+@set DOCUMENT Web page
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end ifhtml
+@ifinfo
+@set DOCUMENT Info file
+@set CHAPTER major node
+@set APPENDIX major node
+@set SECTION minor node
+@set SUBSECTION node
+@end ifinfo
+@ifdocbook
+@set DOCUMENT book
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end ifdocbook
+
+@c some special symbols
+@ifnottex
+@macro ii{text}
+@i{\text\}
+@end macro
+@end ifnottex
+
+@c merge the function and variable indexes into the concept index
+@c do so without the code font, and in the index entries do the
+@c font management ourselves.  Also merge in the chunk definition
+@c and reference entries, which jrweave creates for us.
+@ifnothtml
+@synindex fn cp
+@synindex vr cp
+@synindex cd cp
+@synindex cr cp
+@end ifnothtml
+
+@c If "finalout" is commented out, the printed output will show
+@c black boxes that mark lines that are too long.  Thus, it is
+@c unwise to comment it out when running a master in case there are
+@c overfulls which are deemed okay.
+
+@iftex
+@c @finalout
+@end iftex
+
+@copying
+@docbook
+<para>Published by:</para>
+
+<literallayout class="normal">Arnold David Robbins
+P.O.B. 354
+Nof Ayalon
+D.N. Shimshon 9978500
+ISRAEL
+Email: <email>arnold@@skeeve.com</email>
+URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
+
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015
+Arnold David Robbins
+All Rights Reserved.</literallayout>
+@end docbook
+
+@ifnotdocbook
+Copyright @copyright{} 2007, 2008, 2011, 2015 @*
+Arnold David Robbins @*
+All Rights Reserved.
+@end ifnotdocbook
+@sp 1
+The @command{sortmail} program is copyright
+@copyright{} 2007, 2008,2011, 2015 by Arnold David Robbins. It is published under
+the conditions of the GNU General Public License, version 3.
+@sp 1
+The explanatory text provided in this document may be reproduced verbatim
+but may not be otherwise copied or modified.
+@sp 2
+This is Edition @value{EDITION} of @cite{@value{TITLE}}.
+@end copying
+
+@c Uncomment this for the release.  Leaving it off saves paper
+@c during editing and review.
+@c @setchapternewpage odd
+
+@c Uncomment this if it's ever printed as a real book(let).
+@c @shorttitlepage @value{SHORTTITLE}
+
+@titlepage
+@title @value{TITLE}
+@subtitle @value{UPDATE-MONTH}
+@author Arnold David Robbins
+
+@ifnotdocbook
+@c Include the Distribution inside the titlepage environment so
+@c that headings are turned off.  Headings on and off do not work.
+
+@page
+@vskip 0pt plus 1filll
+Published by:
+@sp 1
+Arnold David Robbins @*
+P.O.B. 354 @*
+Nof Ayalon @*
+D.N. Shimshon 9978500 @*
+ISRAEL @*
+Email: @EMAIL{arnold@@skeeve.com,arnold AT skeeve.com} @*
+URL: @url{http://www.skeeve.com/} @*
+
+@insertcopying
+@end ifnotdocbook
+@end titlepage
+
+@set DRAFT @i{DRAFT}
+
+@iftex
+@headings off
+@evenheading @thispage @| @value{DRAFT} @| @strong{@value{SHORTTITLE}}
+@oddheading  @strong{@thischapter} @| @value{DRAFT} @| @thispage
+@end iftex
+
+@ifnottex
+@ifnotdocbook
+@ifnotxml
+@node Top
+@top General Introduction
+@c Preface node should come right after the Top
+@c node, in `unnumbered' sections, then the introductory chapter.
+@c Licensing nodes are appendices, they're not central to TexiWebJr.
+
+This file documents @code{sortmail}, a program that sort Unix
+mailbox files by thread.
+
+@insertcopying
+@end ifnotxml
+@end ifnotdocbook
+@end ifnottex
+
+@menu
+* Preface::                     Initial words.
+* Introduction::                General introduction.
+* Main Program::                The main program.
+* Support Functions::           Supporting functions.
+* Code Chunk Summaries::        Summary lists and cross-references.
+* Concept Index::               The index.
+
+@detailmenu
+* Audience::                    Who should read this @value{DOCUMENT}.
+* Conventions::                 Typographical conventions.
+* Initialization::              Initializing data.
+* Collecting Lines::            Collecting the input lines.
+* Preparing To Sort::           Building the data structures.
+* Collecting headers::          Building the arrays for the headers.
+* Collecting the subject::      Collecting the @samp{Subject:} line.
+* Collecting the message-id::   Collecting the @samp{Message-ID:} line.
+* Mapping the data::            Creating the relationships.
+* Sorting::                     Sorting them.
+* Dumping::                     Writing out the sorted data.
+* Debugging Code::              Debugging code all in one place.
+* Compute date::                Compute the date.
+* Month days::                  Return the number of days in a given month.
+* Canonicalize subject::        Canonicalize the @samp{Subject:} line.
+* File Definitions::            Source files by definition.
+* Code Chunk Definitions::      Code chunks by definition.
+* Code Chunk References::       Code chunks by reference.
+@end detailmenu
+@end menu
+
+@c @summarycontents
+@contents
+
+@c Add these to the menu if they ever get included.
+@c @node Foreword
+@c @unnumbered Foreword
+
+@node Preface
+@unnumbered Preface
+
+When I discovered a bug in my script for sorting Unix mailboxes,
+I decided to rewrite it using TexiWeb Jr., my literate programming
+system. It took a few hours, but now the bug is fixed.
+
+@menu
+* Audience::                    Who should read this @value{DOCUMENT}.
+* Conventions::                 Typographical conventions.
+@end menu
+
+@node Audience
+@unnumberedsec Intended Audience
+
+If you're interested in @command{awk} programming with
+@command{gawk} and want to see an interesting script, read
+this @value{DOCUMENT}.
+
+@node Conventions
+@unnumberedsec Typographical Conventions
+
+@c Copied mostly verbatim from the gawk manual.
+
+@cindex Texinfo document formatting language
+This @value{DOCUMENT} is written in an enhanced version of
+@uref{http://www.gnu.org/software/texinfo/, Texinfo},
+the GNU documentation formatting language.
+A single Texinfo source file is used to produce both the printed and online
+versions of a program's documentation.
+@ifnotinfo
+Because of this, the typographical conventions
+are slightly different than in other books you may have read.
+@end ifnotinfo
+
+Examples you would type at the command-line are preceded by the common
+shell primary and secondary prompts, @samp{$} and @samp{>}.  Input that
+you type is shown @kbd{like this}.  Output from the command is preceded
+by the glyph ``@print{}''.  This typically represents the command's
+standard output.  Error messages, and other output on the command's
+standard error, are preceded by the glyph ``@error{}''.  For example:
+
+@example
+$ @kbd{echo hi on stdout}
+@print{} hi on stdout
+$ @kbd{echo hello on stderr 1>&2}
+@error{} hello on stderr
+@end example
+
+@ifnotinfo
+In the text, command names appear in @code{this font}, while code segments
+appear in the same font and quoted, @samp{like this}.  Options look
+like this: @option{-f}.  Some things are emphasized @emph{like this},
+and if a point needs to be made strongly, it is done @strong{like this}.
+The first occurrence of a new term is usually its @dfn{definition} and
+appears in the same font as the previous occurrence of ``definition''
+in this sentence.  Finally, file names are indicated like this:
+@file{/path/to/our/file}.
+@end ifnotinfo
+
+
+@node Introduction
+@chapter Introduction
+
+Internet mail is random. Much like IP packets,
+email messages can be lost, duplicated, and arrive out of order.
+
+I am a luddite. I still use Berkely Mail (in its modern incarnation
+of Heirloom @command{mailx}) to read my email.  For many years I
+wanted to write a script to sort my email by ``thread''---that is,
+grouping related messages together by date and subject.
+
+I wrote such a program in 2004, and it evolved in fits and starts until
+about 2011.  In 2015, I found a serious bug in how @samp{Subject:} lines
+were processed, so I decided to rewrite the program using TexiWeb Jr.
+
+@node Main Program
+@chapter Sorting A Mailbox
+
+The structure of @file{sortmail.awk} follows that of most
+@command{awk} programs: Initialization, collection and
+maybe some processing, final processing in the @code{END}
+rule, and support functions.
+
+@menu
+* Initialization::              Initializing data.
+* Collecting Lines::            Collecting the input lines.
+* Preparing To Sort::           Building the data structures.
+* Sorting::                     Sorting them.
+* Dumping::                     Writing out the sorted data.
+* Debugging Code::              Debugging code all in one place.
+@end menu
+
+@(sortmail.awk@)=
+@<Leading comments and license@>
+
+BEGIN {
+	@<Initialize variables and arrays@>
+}
+
+@<Collect mailbox lines, build @code{Header} and @code{Body} arrays@>
+
+END {
+	@<Setup data for sorting@>
+	@<Sort the data@>
+	@<Dump the data@>
+}
+
+@<Support Functions@>
+@
+
+@use_smallexample
+@<Leading comments and license@>=
+#! /usr/bin/gawk -f
+
+# sortmail.awk --- sort a Unix style mailbox by "thread", in date+subject order.
+# Use Message-ID header to detect and remove duplicates.  Requires GNU Awk for
+# time/date and sorting functions but could be made to run on a POSIX awk
+# with some work.
+#
+# Copyright (C) 2007, 2008, 2011, 2015, Arnold David Robbins
+# arnold@skeeve.com
+#
+# Sortmail.awk is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Sortmail.awk is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+@
+@use_example
+
+@node Initialization
+@section Initialization
+
+Initializationis pretty simple. The @code{Months}
+array holds the names of the months. The @code{MonthDays}
+array holds the number of days in each month.
+
+@<Initialize variables and arrays@>=
+@<Initialize constants@>
+@<Initialize @code{Months}@>
+@<Initialize @code{MonthDays}@>
+@<Initialize other variables@>
+@
+
+What program could survive without @code{TRUE} and @code{FALSE}?
+
+@<Initialize constants@>=
+TRUE = 1
+FALSE = 0
+@
+
+Setting up @code{Months} is straightforward using @code{split()}. This
+is a typical idiom to use a bunch of strings as array indices.
+
+@<Initialize @code{Months}@>=
+split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", months, " ")
+for (i in months)
+	Month[months[i]] = i	# map name to number
+@
+
+Finally, here are the other variables.
+Each one's purpose will become clear as we progress.
+
+@<Initialize other variables@>=
+In_header = FALSE
+
+# These keep --lint happier
+Debug = 0
+MessageNum = 0
+Duplicates = 0
+@
+
+@node Collecting Lines
+@section Collecting Lines
+
+Previous versions of this program built up the data arrays as the input
+mailbox was read.  In particular, each header was found and stored.
+The problem is that @uref{https://www.ietf.org/rfc/rfc2822.txt, RFC 1822}
+mail headers allow for continuation across lines by starting the second
+and subsequent lines with whitespace.  Thus, you can't tell that a header
+is continued without looking ahead.
+
+The previous versions did not do this at all for the @samp{Subject:}
+header, and they did not do it correctly for the @samp{Message-ID:}
+header.
+
+Thus, this version simply collects the header and body of each message,
+and processes them at the end.
+
+Each message in a Unix mailbox starts with a @samp{@w{From@ }} line.
+Lines in the body that start with those five characters (F, r, o, m,
+space) are escaped. When such a line is seen, that signals the start of
+a new message and the collection of the header.
+
+The header is separated from the body by an empty line; the body
+continues to the next @samp{@w{From@ }} line. It is convenient to store
+the terminating blank line as the last line of the header instead of as
+the first line of the body.
+
+@<Collect mailbox lines, build @code{Header} and @code{Body} arrays@>=
+{
+	Line = $0
+	if (Line ~ /^From /) {
+		In_header = TRUE
+		MessageNum++
+		header_line = 1
+		body_line = 1
+		Header[MessageNum, header_line++] = Line
+	} else if (In_header) {
+		if (Line ~ /^$/) {
+			In_header = FALSE
+		}
+		Header[MessageNum, header_line++] = Line
+	} else
+		Body[MessageNum, body_line++] = Line
+}
+@
+
+As a side note, the program uses traditional @command{awk} simulated
+multidimensional arrays instead of @command{gawk}'s true arrays of arrays.
+This is because the program predates that feature, and I didn't feel like
+changing it, since most of the code was transferred verbatim.
+
+@node Preparing To Sort
+@section Preparing For Sorting
+
+Once all the lines have been collected, it's time to collect the headers
+for each message. Of interest are the @samp{Date:}, @samp{Subject:},
+and @code{Message-ID:} headers.
+
+The subject identifies the thread, and the date associated with each
+message gives us the ordering within the thread.  The date is turned
+into a ``seconds since the epoch'' timestamp to use in sorting.
+
+The first step is to get lists of subjects, dates, and message IDs, into
+individual arrays, indexed by message number.  In this case, in the rest
+of the code in this @value{SECTION}, the simple variable @code{i} is the
+current message number.  (In retrospect, using a name like @code{msgnum}
+would have been better.)
+
+@<Setup data for sorting@>=
+for (i = 1; i <= MessageNum; i++) {
+	@<Collect headers@>
+	@<Map subject, date, and message-id to index into text@>
+}
+@
+
+@menu
+* Collecting headers::          Building the arrays for the headers.
+* Mapping the data::            Creating the relationships.
+@end menu
+
+@node Collecting headers
+@subsection Collecting Header Information
+
+RFC 2822 headers are case-independant.  Thus, I really should
+use @code{tolower()} or @code{toupper()} before doing a regexp match. In
+practice, almost always the first letter is uppercase and the the rest
+are lowercase.  The message ID is an exception; different cases for the
+@samp{ID} part are common.
+
+The date is handled by the @code{compute_date()} function shown
+in @ref{Compute date}.
+
+@<Collect headers@>=
+for (j = 1; (i, j) in Header; j++) {
+	if (Header[i, j] ~ /^[Dd]ate: /) {
+		Date[i] = compute_date(Header[i, j])
+	} else if (Header[i, j] ~ /^[Ss]ubject: /) {
+		@<Process the @code{Subject:} line@>
+	} else if (Header[i, j] ~ /^[Mm]essage-[Ii][Dd]: */) {
+		@<Process the @code{Message-ID:} header@>
+	}
+}
+@
+
+@menu
+* Collecting the subject::      Collecting the @samp{Subject:} line.
+* Collecting the message-id::   Collecting the @samp{Message-ID:} line.
+@end menu
+
+@node Collecting the subject
+@subsubsection Collecting The @samp{Subject:} Line
+
+The @samp{Subject:} line needs care. If it's continued, it must
+be collected fully. The loop does that, building up the full
+line in @code{subj_line}. The @code{canonacalize_subject()}
+function (@pxref{Canonicalize subject}) converts the collected
+line into a ``canonical'' form so that it can be used as a sort key:
+
+@<Process the @code{Subject:} line@>=
+subj_line = Header[i, j]
+for (k = j + 1; (i, k) in Header && Header[i, k] ~ /^[[:space:]]/; k++)
+	subj_line = subj_line "\n" Header[i, k]
+Subject[i] = canonacalize_subject(subj_line)
+@
+
+@node Collecting the message-id
+@subsubsection Collecting The @samp{Message-ID:} Line
+
+The @code{Message-ID:} header helps us identify duplicate
+messages in the input mailbox.
+
+@<Process the @code{Message-ID:} header@>=
+@<Check for continued @code{Message-ID:} line, handle it@>
+line = tolower(message_id_line)
+split(line, linefields)
+
+message_id = linefields[2]
+Mesg_ID[i] = message_id	# needed for disambiguating message
+@<Check for duplicates and print a message@>
+@
+
+The @samp{Message-ID:} header might be continued,
+so we have to handle that. If it's continued, there
+may or may not be trailing whitespace after the colon,
+so the regexp constant used to test it should
+include an optional space.  (This was a bug in previous versions of
+the program.)
+
+@<Check for continued @code{Message-ID:} line, handle it@>=
+message_id_line = Header[i, j]
+if (tolower(message_id_line) ~ /^message-id: *$/) {
+	# line is only the header name, get the next line
+	message_id_line = message_id_line " " Header[i, j+1]
+}
+@
+
+Remember that @code{i} is the current message being processed.
+The @code{Message_IDs} array tracks message numbers, and if
+there are duplicates, all of the ones that are duplicated.
+
+@code{Duplicates} becomes nonzero when there are duplicates.
+
+@<Check for duplicates and print a message@>=
+if (message_id in Message_IDs) {
+	printf("Message %d is duplicate of %s (%s)\n",
+		i, Message_IDs[message_id],
+		message_id) > "/dev/stderr"
+	Message_IDs[message_id] = (Message_IDs[message_id] ", " i)
+	Duplicates++
+} else {
+	Message_IDs[message_id] = i ""
+}
+@
+
+@node Mapping the data
+@subsection Map The Keys Into An Index Into The Text
+
+We use a triplet of (subject, date, message ID) to uniquely
+identify each message. @command{awk}'s multidimensional
+arrays (creating a unique subscript by concatenating the
+values separated by @code{SUBSEP} work nicely here.
+This data is tracked in the @code{SubjectDateId} array.
+
+@<Map subject, date, and message-id to index into text@>=
+@<Debug: Check for same triplet already seen@>
+
+SubjectDateId[Subject[i], Date[i], Mesg_ID[i]] = i
+
+@<Debug: Print current info@>
+@<Build mapping of subject to earliest date for that subject@>
+@
+
+As a nice side-effect of correctly collecting the headers, duplicate
+messages are automatically discarded. How?  Consider: Duplicate messages
+will have the same date, subject, and message ID. As a result, the
+assignment statement above stores the message number of just the last
+duplicate.
+
+Separately, we find the first date in the thread, which
+lets us sort the threads.
+
+@<Build mapping of subject to earliest date for that subject@>=
+if (! (Subject[i] in FirstDates) || FirstDates[Subject[i]] > Date[i])
+	FirstDates[Subject[i]] = Date[i]
+@
+
+@node Sorting
+@section Sorting The Data
+
+Sorting the data is simple: prepare the data and then sort it.
+There's a lot of debugging code that probably isn't really needed anymore.
+
+@<Sort the data@>=
+@<Debug: Sorting: Print statisics@>
+@<Create @code{Thread} array to sort by thread@>
+@<Sort @code{Thread}, placing the results in @code{SortedThread}@>
+@<Debug: Sorting: Print info on sorted threads@>
+@<Make sure nothing is weird@>
+@<Debug: Sorting: Dump info to @file{DUMP1}@>
+@
+
+We sort the messages by thread, which is essentially
+the subject. The date the message was sent provides ordering
+within the thread, and adding in the message-ID gives us
+unique messages.
+
+One issue remains: how to order each thread? The answer is
+to order them by the earliest date associated with a subject,
+thus ordering the threads by when they were started.  (Or,
+more technically, by the earliest extant message in the thread.)
+
+@<Create @code{Thread} array to sort by thread@>=
+# Subscript is earliest date, subject, actual date, message-id
+# Value is subject, actual date, message-id
+for (i in SubjectDateId) {
+	n = split(i, t, SUBSEP)
+	if (n != 3) {
+		printf("yowsa! n != 3 (n == %d)\n", n) > "/dev/stderr"
+		exit 1
+	}
+	# now have subject, date, message-id in t
+	# create index into Text
+	Thread[FirstDates[t[1]], i] = SubjectDateId[i]
+}
+@
+
+Once the @code{Thread} array is set up, with the indices
+identifying both the threads and the earliest occurence of
+each, it's time to sort the data.  @command{gawk}'s built-in
+@code{asorti()} function does this for us:
+
+@<Sort @code{Thread}, placing the results in @code{SortedThread}@>=
+n = asorti(Thread, SortedThread)	# Shazzam!
+@
+
+Finally, we double check that everything is as it should be.
+This too could probably be removed.
+
+@<Make sure nothing is weird@>=
+if (n != MessageNum && Duplicates == 0) {
+	printf("yowsa! n != MessageNum (n == %d, MessageNum == %d)\n",
+		n, MessageNum) > "/dev/stderr"
+#	exit 1
+}
+@
+
+@node Dumping
+@section Dumping The Data
+
+Dumping the data is easy.
+Go through each thread in order of sorted thread,
+dumping the header and the body.
+
+When done, the output file should be identical in
+size to the input (unless duplicates were removed),
+with the same number of messages.
+
+@<Dump the data@>=
+for (i = 1; i <= MessageNum; i++) {
+	k = Thread[SortedThread[i]]
+	for (j = 1; (k, j) in Header; j++)
+		print Header[k, j]
+	for (j = 1; (k, j) in Body; j++)
+		print Body[k, j]
+}
+@
+
+Previous versions sent the output to a file with a fixed
+name.  That was a flaw. This version corrects it, returning to
+basic @cite{Software Tools} principles, and prints the results
+to standard output.
+
+@node Debugging Code
+@section Debugging Print Statements
+
+The debugging statements are collected here so that they don't
+disturb the main flow of the program. This is one of the benefits
+of literate programming tools.
+
+@use_smallexample
+@<Debug: Check for same triplet already seen@>=
+if (Debug && (Subject[i], Date[i], Mesg_ID[i]) in SubjectDateId) {
+	printf(\
+("Message %d: Subject <%s> Date <%s> Message-ID <%s> already in" \
+" SubjectDateId (Message %d, s: <%s>, d <%s> i <%s>)!\n"),
+	i, Subject[i], Date[i], Mesg_ID[i],
+	SubjectDateId[Subject[i], Date[i], Mesg_ID[i]],
+	Subject[SubjectDateId[Subject[i], Date[i], Mesg_ID[i]]],
+	Date[SubjectDateId[Subject[i], Date[i], Mesg_ID[i]]],
+	Mesg_ID[SubjectDateId[Subject[i], Date[i], Mesg_ID[i]]]) \
+		> "/dev/stderr"
+}
+@
+
+@<Debug: Print current info@>=
+if (Debug) {
+	printf("\tMessage Num = %d, length(SubjectDateId) = %d\n",
+		i, length(SubjectDateId)) > "/dev/stderr"
+	if (i != length(SubjectDateId) && ! Printed1) {
+		Printed1++
+		printf("---> Message %d <---\n", i) > "/dev/stderr"
+	}
+}
+@
+
+@<Debug: Sorting: Print statisics@>=
+if (Debug) {
+	printf("length(SubjectDateId) = %d, length(Subject) = %d, length(Date) = %d\n",
+		length(SubjectDateId), length(Subject), length(Date)) > "/dev/stderr"
+	printf("length(FirstDates) = %d\n", length(FirstDates)) > "/dev/stderr"
+}
+@
+
+@<Debug: Sorting: Print info on sorted threads@>=
+if (Debug) {
+	printf("length(Thread) = %d, length(SortedThread) = %d\n",
+		length(Thread), length(SortedThread)) > "/dev/stderr"
+}
+@
+
+@<Debug: Sorting: Dump info to @file{DUMP1}@>=
+if (Debug) {
+	for (i = 1; i <= n; i++)
+		printf("SortedThread[%d] = %s, Thread[SortedThread[%d]] = %d\n",
+	 		i, SortedThread[i], i, Thread[SortedThread[i]]) > "DUMP1"
+	close("DUMP1")
+	if (Debug ~ /exit/)
+		exit 0
+}
+@
+@use_example
+
+@node Support Functions
+@chapter Support Functions
+
+@command{sortmail} needs some auxiliary functions.
+
+@menu
+* Compute date::                Compute the date.
+* Month days::                  Return the number of days in a given month.
+* Canonicalize subject::        Canonicalize the @samp{Subject:} line.
+@end menu
+
+@<Support Functions@>=
+@<Turn the date into a timestamp@>
+@<Compute the days in the given month for the given year@>
+@<Canonicalize subject line@>
+@
+
+@node Compute date
+@section Computing The Date As A Timestamp
+
+The @samp{Date:} header needs to be turned into a timestamp
+of the ``seconds since the epoch'' form.  This function does the
+job.
+
+@<Turn the date into a timestamp@>=
+# compute_date --- pull apart a date string and convert to timestamp
+
+function compute_date(date_rec,		fields, year, month, day,
+					hour, min, sec, tzoff, tzmin, timestamp)
+{
+	@<Split the record into fields@>
+	@<Parse the @code{Date:} header@>
+	@<Compute timezone offset@>
+	@<Add timezone offset to hour@>
+	@<If moved into next day, reset other values@>
+
+	# -1 means DST unknown
+	timestamp = mktime(sprintf("%d %d %d %d %d %d -1",
+				year, month, day, hour, min, sec))
+
+	# timestamps can be 9 or 10 digits.
+	# canonicalize them into 11 digits with leading zeros
+	return sprintf("%011d", timestamp)
+}
+@
+
+The record is split into fields on spaces, colons, and commas:
+
+@<Split the record into fields@>=
+split(date_rec, fields, "[:, ]+")
+@
+
+We must deal with several different forms of @samp{Date:}
+header. This is straightforward but a little tedious:
+
+@<Parse the @code{Date:} header@>=
+if (fields[2] ~ /Sun|Mon|Tue|Wed|Thu|Fri|Sat/) {
+	if ($6 == "at") {
+		# Date: Thu, Apr 26, 2012 at 7:04 AM
+		year = fields[5]
+		month = Month[fields[3]]
+		day = fields[4] + 0
+		hour = fields[7]
+		if (tolower(fields[9]) == "pm")
+			hour += 12
+		min = fields[8]
+		sec = 0
+		tzoff = 0
+	} else {
+		# Date: Thu, 05 Jan 2006 17:11:26 -0500
+		year = fields[5]
+		month = Month[fields[4]]
+		day = fields[3] + 0
+		hour = fields[6]
+		min = fields[7]
+		sec = fields[8]
+		tzoff = fields[9] + 0
+	}
+} else {
+	# Date: 05 Jan 2006 17:11:26 -0500
+	year = fields[4]
+	month = Month[fields[3]]
+	day = fields[2] + 0
+	hour = fields[5]
+	min = fields[6]
+	sec = fields[7]
+	tzoff = fields[8] + 0
+}
+@
+
+Turn the timezone offset into a number.
+Apparently only @samp{GMT} needs to be special cased.
+
+@<Compute timezone offset@>=
+if (tolower(tzoff) == "gmt")
+	tzoff = 0
+@<Handle a timezone offset with hours and minutes@>
+@
+
+Timezone values need not be in round values of hours,
+they can also be partial. It's possible that adjusting
+for the timezone offset can shift a timestamp backwards
+across midnight, effectively changing the date:
+
+@<Handle a timezone offset with hours and minutes@>=
+# tzoff is usually of form -0200 or +0500 but
+# can sometimes be of form +0530, so deal with that.
+tzmin = 0
+if (tzoff !~ /00$/) {
+	# there are minutes in the tz offset
+	tzmin = substr(tzmin, length(tzmin) - 2) + 0
+	if (min - tzmin < 0) {
+		min = 60 + (min - tzmin)
+		if (--hour < 0) {
+			hour = 23
+			if (--day == 0) {
+				day = 1
+				if (--month == 0) {
+					month = 1
+					year--
+				}
+			}
+		}
+	} else
+		min -= tzmin
+}
+@<Convert offset to hours@>
+@
+
+Finally, we must convert the offset into hours, and then change the sign
+so that adding it will bring the time into GMT.  (Times west of GMT are
+negative, so the sign must switch to positive, and vice versa.)
+
+@<Convert offset to hours@>=
+tzoff = int(tzoff / 100)
+tzoff = -tzoff
+@
+
+We could try to compensate for the local timezone, but
+this isn't really necessary. Why?
+@code{mktime()} wants a local time, which can be
+computed as:
+
+@example
+hour + tzoff @result{} GMT
+GMT + LocalOffset @result{} local time
+@end example
+
+@noindent
+But since all we need is distinct values for sorting, we just do everything in GMT:
+
+@<Add timezone offset to hour@>=
+hour += tzoff
+@
+
+Finally, after adding the timezone offset to the hour, we have to check if
+we've moved into the next day, and adjust the other values appropriately:
+
+@<If moved into next day, reset other values@>=
+if (hour > 23) {
+	hour %= 24
+	day++
+	if (day > days_in_month(month, year)) {
+		day = 1
+		month++
+		if (month > 12) {
+			month = 1
+			year++
+		}
+	}
+}
+@
+
+@node Month days
+@section Computing The Number of Days In A Given Month
+
+The @code{MonthDays} array helps in computing the correct
+value:
+
+@<Initialize @code{MonthDays}@>=
+split("31 28 31 30 31 30 31 31 30 31 30 31", MonthDays, " ")
+@
+
+The number of days in a month is constant, except for February, where
+the count varies if the year is a leap year or not. This function does
+the work:
+
+@<Compute the days in the given month for the given year@>=
+# days_in_month --- how many days in the given month
+
+function days_in_month(month, year)
+{
+	if (month != 2)
+		return MonthDays[month]
+
+	if (year % 4 == 0 && year % 400 != 0)
+		return 29
+
+	return 28
+}
+@
+
+@node Canonicalize subject
+@section Canonicalizing The @samp{Subject:} Line
+
+The @samp{Subject:} line is one of the sort keys.  Mailers often mangle
+it, so it must be converted to a ``canonical'' form for use as a sort key
+and array subscript. This function does the job.  The comments alongside
+each line of code explain what that line is doing:
+
+@use_smallexample
+@<Canonicalize subject line@>=
+# canonacalize_subject --- trim out "Re:", white space
+
+function canonacalize_subject(subj_line)
+{
+	subj_line = tolower(subj_line)			# lower case the line
+	sub(/^subject: +/, "", subj_line)		# remove "subject:"
+	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
+	gsub(/\n/, " ", subj_line)				# merge multiple lines
+	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
+	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
+
+	return subj_line						# return the result
+}
+@
+@use_example
+
+@node Code Chunk Summaries
+@appendix Code Chunk Summaries
+
+This @value{APPENDIX} presents alphabetical lists of
+all the file definitions, the code chunk definitions,
+and the code chunk references.
+
+@menu
+* File Definitions::            Source files by definition.
+* Code Chunk Definitions::      Code chunks by definition.
+* Code Chunk References::       Code chunks by reference.
+@end menu
+
+@node File Definitions
+@appendixsec Source File Definitions
+
+@print_file_defs
+
+@node Code Chunk Definitions
+@appendixsec Code Chunk Definitions
+
+@print_code_defs
+
+@node Code Chunk References
+@appendixsec Code Chunk References
+
+@print_code_refs
+
+@node Concept Index
+@unnumbered Index
+
+@printindex cp
+
+@bye
+
+TODO:
