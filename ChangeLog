@@ -1,3 +1,8 @@
+2015-09-25         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* README.txt, COPYING: New files.
+	* texinfo.tex: Updated.
+
 2015-09-21         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Speed up processing by building the body
