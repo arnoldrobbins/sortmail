@@ -1,3 +1,8 @@
+2016-03-16         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Move text to GPL 3. Fix a typo. Bump to edition 1.1.
+	* texinfo.tex: Updated.
+
 2015-09-25         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* README.txt, COPYING: New files.

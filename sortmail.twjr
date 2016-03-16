@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH September, 2015
-@set EDITION 1.0
+@set UPDATE-MONTH March, 2016
+@set EDITION 1.1
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -93,23 +93,25 @@ ISRAEL
 Email: <email>arnold@@skeeve.com</email>
 URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
 
-<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016
 Arnold David Robbins
 All Rights Reserved.</literallayout>
 @end docbook
 
 @ifnotdocbook
-Copyright @copyright{} 2007, 2008, 2011, 2015 @*
+Copyright @copyright{} 2007, 2008, 2011, 2015, 2015 @*
 Arnold David Robbins @*
 All Rights Reserved.
 @end ifnotdocbook
 @sp 1
 The @command{sortmail} program is copyright
-@copyright{} 2007, 2008,2011, 2015 by Arnold David Robbins. It is published under
+@copyright{} 2007, 2008,2011, 2015, 2016 by Arnold David Robbins.
+It is published under
 the conditions of the GNU General Public License, version 3.
 @sp 1
-The explanatory text provided in this document may be reproduced verbatim
-but may not be otherwise copied or modified.
+As of Edition 1.1, the The explanatory text provided in this document is
+also published under the conditions of the GNU General Public License,
+version 3.
 @sp 2
 This is Edition @value{EDITION} of @cite{@value{TITLE}}.
 @end copying
@@ -218,7 +220,7 @@ I decided to rewrite it using TexiWeb Jr., my literate programming
 system. It took a few hours, but now the bug is fixed.
 
 A few months later I found that the program was much slower than
-the origian, and I was able to speed it back up.
+the original, and I was able to speed it back up.
 
 @menu
 * Audience::                    Who should read this @value{DOCUMENT}.
