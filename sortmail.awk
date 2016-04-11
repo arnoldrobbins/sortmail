@@ -5,7 +5,7 @@
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -73,7 +73,7 @@ END {
 				Date[i] = compute_date(Header[i][j])
 			} else if (Header[i][j] ~ /^[Ss]ubject: /) {
 				subj_line = Header[i][j]
-				for (k = j + 1;  k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
+				for (k = j + 1; k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
 					subj_line = subj_line "\n" Header[i][k]
 				Subject[i] = canonacalize_subject(subj_line)
 			} else if (Header[i][j] ~ /^[Mm]essage-[Ii][Dd]: */) {

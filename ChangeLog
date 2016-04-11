@@ -1,3 +1,9 @@
+2016-04-11         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Some small cleanups and edits.
+	Bump to edition 1.2.
+	* Makefile: Cleanup a bit, make HTML version by default too.
+
 2016-03-16         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Move text to GPL 3. Fix a typo. Bump to edition 1.1.

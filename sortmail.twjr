@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH March, 2016
-@set EDITION 1.1
+@set UPDATE-MONTH April, 2016
+@set EDITION 1.2
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -282,8 +282,9 @@ in this sentence.  Finally, file names are indicated like this:
 Internet mail is random. Much like IP packets,
 email messages can be lost, duplicated, and arrive out of order.
 
-I am a luddite. I still use Berkely Mail (in its modern incarnation
-of Heirloom @command{mailx}) to read my email.  For many years I
+I am a luddite. I still use Berkely Mail (in its modern incarnation of
+@uref{http://heirloom.sourceforge.net/mailx.html, Heirloom @command{mailx}})
+to read my email.  For many years I
 wanted to write a script to sort my email by ``thread''---that is,
 grouping related messages together by date and subject.
 
@@ -319,7 +320,7 @@ BEGIN {
 
 END {
 	@<Save last message's body@>
-	@<Setup data for sorting@>
+	@<Set up data for sorting@>
 	@<Sort the data@>
 	@<Dump the data@>
 }
@@ -336,7 +337,7 @@ END {
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -358,9 +359,7 @@ END {
 @node Initialization
 @section Initialization
 
-Initialization is pretty simple. The @code{Months}
-array holds the names of the months. The @code{MonthDays}
-array holds the number of days in each month.
+Initialization is pretty simple.
 
 @<Initialize variables and arrays@>=
 @<Initialize constants@>
@@ -376,6 +375,9 @@ TRUE = 1
 FALSE = 0
 @
 
+The @code{Months} array holds the names of the months. The
+@code{MonthDays} array holds the number of days in each month.
+They are used for parsing the @samp{Date:} header.
 Setting up @code{Months} is straightforward using @code{split()}. This
 is a typical idiom to use a bunch of strings as array indices.
 
@@ -404,7 +406,7 @@ body = ""
 
 Previous versions of this program built up the data arrays as the input
 mailbox was read.  In particular, each header was found and stored.
-The problem is that @uref{https://www.ietf.org/rfc/rfc2822.txt, RFC 1822}
+The problem is that @uref{https://www.ietf.org/rfc/rfc2822.txt, RFC 2822}
 mail headers allow for continuation across lines by starting the second
 and subsequent lines with whitespace.  Thus, you can't tell that a header
 is continued without looking ahead.
@@ -486,7 +488,7 @@ of the code in this @value{SECTION}, the simple variable @code{i} is the
 current message number.  (In retrospect, using a name like @code{msgnum}
 would have been better.)
 
-@<Setup data for sorting@>=
+@<Set up data for sorting@>=
 for (i = 1; i <= MessageNum; i++) {
 	@<Collect headers@>
 	@<Map subject, date, and message-id to index into text@>
@@ -538,7 +540,7 @@ line into a ``canonical'' form so that it can be used as a sort key:
 
 @<Process the @code{Subject:} line@>=
 subj_line = Header[i][j]
-for (k = j + 1;  k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
+for (k = j + 1; k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
 	subj_line = subj_line "\n" Header[i][k]
 Subject[i] = canonacalize_subject(subj_line)
 @
@@ -598,7 +600,7 @@ if (message_id in Message_IDs) {
 We use a triplet of (subject, date, message ID) to uniquely
 identify each message. Standard @command{awk}'s multidimensional
 arrays (creating a unique subscript by concatenating the
-values separated by @code{SUBSEP} work nicely here.
+values separated by @code{SUBSEP}) work nicely here.
 This data is tracked in the @code{SubjectDateId} array.
 
 @<Map subject, date, and message-id to index into text@>=
@@ -714,7 +716,13 @@ to standard output.
 
 The debugging statements are collected here so that they don't
 disturb the main flow of the program. This is one of the benefits
-of literate programming tools.
+of using literate programming tools.
+
+The @code{Debug} variable can contain anything, but if we test for
+words or patterns, it allows finer grained control over debugging
+output. The technique is only used once in this program but was
+quite effective when working on TexiWebJr itself.
+
 
 @use_smallexample
 @<Debug: Check for same triplet already seen@>=
