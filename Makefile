@@ -33,4 +33,4 @@ sortmail-fop.pdf: sortmail.xml
 	fop -xml sortmail.xml -pdf sortmail-fop.pdf -xsl /usr/share/xml/docbook/stylesheet/docbook-xsl/fo/docbook.xsl
 
 clean:
-	rm -fr sortmail*.pdf sortmail.t2p sortmail.texi sortmail.html sortmail.info
+	rm -fr sortmail*.pdf sortmail.t2p sortmail.texi sortmail.html sortmail.info sortmail.xml
