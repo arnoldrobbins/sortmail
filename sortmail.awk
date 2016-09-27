@@ -37,6 +37,13 @@ BEGIN {
 	Duplicates = 0
 	
 	body = ""
+	Thread_summary_file = ""
+	Last_summary_subject = ""
+	if (ARGV[1] == "-s" && (2 in ARGV)) {
+		Thread_summary_file = ARGV[2]
+		delete ARGV[1]
+		delete ARGV[2]
+	}
 }
 
 {
@@ -160,12 +167,35 @@ END {
 	}
 	for (i = 1; i <= MessageNum; i++) {
 		k = Thread[SortedThread[i]]
-		for (j = 1; j in Header[k]; j++)
+		for (j = 1; j in Header[k]; j++) {
 			print Header[k][j]
+			if (Thread_summary_file && Header[k][j] ~ /^[Ff]rom: /)
+				dump_summary(i, Header[k][j], SortedThread[i])
+		}
 		print Body[k]
 	}
+	if (Thread_summary_file != "")
+		close(Thread_summary_file)
 }
 
+function dump_summary(messagenum, from, thread_info,
+					  t, n, subj)
+{
+	# thread_info is in the form
+	# <first date> SUBSEP <subject> SUBSEP <actual date> SUBSEP <message-id>
+	sub(/^[Ff]rom:[[:space:]]*/, "", from)
+	n = split(thread_info, t, SUBSEP)
+	subj = t[2]
+	if (subj != Last_summary_subject)
+	{
+		printf("%-5d \"%-25.25s\" %-33.33s %s\n",
+			messagenum,
+			subj,
+			from,
+			strftime("%Y-%m-%d", t[1])) > Thread_summary_file
+		Last_summary_subject = subj
+	}
+}
 # compute_date --- pull apart a date string and convert to timestamp
 
 function compute_date(date_rec,		fields, year, month, day,

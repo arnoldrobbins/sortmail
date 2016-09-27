@@ -1,11 +1,17 @@
+2016-09-27         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Add a -s option for creating a thread
+	summary. Includes a review of the major variables.
+	Bump edition number to 1.3.
+
 2016-06-08         Arnold D. Robbins     <arnold@skeeve.com>
 
-	* sortmail.texi: Fix copyright statement for not docbook case.
+	* sortmail.twjr: Fix copyright statement for not docbook case.
 	* Makefile (clean): Remove sortmail.xml too.
 
 2016-04-14         Arnold D. Robbins     <arnold@skeeve.com>
 
-	* sortmail.texi: Make the index be valid docbook.
+	* sortmail.twjr: Make the index be valid docbook.
 	* Makefile: Add more targets.
 
 2016-04-11         Arnold D. Robbins     <arnold@skeeve.com>
