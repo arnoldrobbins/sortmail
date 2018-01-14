@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH September, 2016
-@set EDITION 1.3
+@set UPDATE-MONTH January, 2018
+@set EDITION 1.4
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -93,19 +93,19 @@ ISRAEL
 Email: <email>arnold@@skeeve.com</email>
 URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
 
-<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018
 Arnold David Robbins
 All Rights Reserved.</literallayout>
 @end docbook
 
 @ifnotdocbook
-Copyright @copyright{} 2007, 2008, 2011, 2015, 2016 @*
+Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018 @*
 Arnold David Robbins @*
 All Rights Reserved.
 @end ifnotdocbook
 @sp 1
 The @command{sortmail} program is copyright
-@copyright{} 2007, 2008,2011, 2015, 2016 by Arnold David Robbins.
+@copyright{} 2007, 2008, 2011, 2015, 2016, 2018 by Arnold David Robbins.
 It is published under
 the conditions of the GNU General Public License, version 3.
 @sp 1
@@ -187,6 +187,9 @@ mailbox files by thread.
 * Audience::                    Who should read this @value{DOCUMENT}.
 * Conventions::                 Typographical conventions.
 * Initialization::              Initializing data.
+* Command line::                Processing command line options.
+* Dumping thread summaries::    Dumping a thread summary.
+* First item is first::         Treating the first message specially.
 * Collecting Lines::            Collecting the input lines.
 * Preparing To Sort::           Building the data structures.
 * Collecting headers::          Building the arrays for the headers.
@@ -197,7 +200,6 @@ mailbox files by thread.
 * Dumping::                     Writing out the sorted data.
 * Summary of each variable::    Remembering what each array holds.
 * Dumping the data itself::     Actually dumping the data.
-* Dumping thread summaries::    Dumping a thread summary.
 * Debugging Code::              Debugging code all in one place.
 * Compute date::                Compute the date.
 * Month days::                  Return the number of days in a given month.
@@ -305,6 +307,7 @@ rule, and support functions.
 
 @menu
 * Initialization::              Initializing data.
+* Command line::                Processing command line options.
 * Collecting Lines::            Collecting the input lines.
 * Preparing To Sort::           Building the data structures.
 * Sorting::                     Sorting them.
@@ -342,7 +345,7 @@ END {
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -406,6 +409,123 @@ Duplicates = 0
 body = ""
 @
 
+@node Command line
+@section Command Line Options
+
+Over time, the program has started to acrete command-line
+options. Here we process them.
+
+@<Process options@>=
+for (i = 1; i < ARGC; i++) {
+	@<Thread summary option@>
+	@<First item remains first option@>
+}
+@
+
+@menu
+* Dumping thread summaries::    Dumping a thread summary.
+* First item is first::         Treating the first message specially.
+@end menu
+
+@node Dumping thread summaries
+@subsection Dumping a thread summary
+
+When I get really behind on my mail, I start to want a list of the threads
+in my inbox.  To allow for this, we add a @option{-T @var{file}} option.
+Using @option{-T} avoids conflicts with any (currently) existing @command{gawk}
+option.
+
+@<Thread summary option@>=
+if (ARGV[i] == "-T" && ((i+1) in ARGV)) {
+	Thread_summary_file = ARGV[i+1]
+	delete ARGV[i]
+	delete ARGV[i+1]
+	++i		# skip over file name in the loop
+}
+@
+
+We need the @code{Thread_summary_file} variable:
+
+@<Initialize other variables@>=
+Thread_summary_file = ""
+@
+
+The @code{dump_summary()} function dumps the thread summary.
+It splits the information for the first message in each thread
+apart, formats it nicely, and prints it.
+
+@<Support Functions@>=
+function dump_summary(messagenum, from, thread_info,
+					  t, n, subj)
+{
+	# thread_info is in the form
+	# <first date> SUBSEP <subject> SUBSEP <actual date> SUBSEP <message-id>
+	sub(/^[Ff]rom:[[:space:]]*/, "", from)
+	n = split(thread_info, t, SUBSEP)
+	subj = t[2]
+	if (subj != Last_summary_subject)
+	{
+		printf("%-5d \"%-25.25s\" %-33.33s %s\n",
+			messagenum,
+			subj,
+			from,
+			strftime("%Y-%m-%d", t[1])) > Thread_summary_file
+		Last_summary_subject = subj
+	}
+}
+@
+
+We also need the @code{Last_summary_subject} variable:
+
+@<Initialize other variables@>=
+Last_summary_subject = ""
+@
+
+It's good practice to clean things up at the end.
+
+@<Close thread summary file@>=
+if (Thread_summary_file != "")
+	close(Thread_summary_file)
+@
+
+@node First item is first
+@subsection Keeping The First Item As First
+
+In the case of a mailbox which stores mail until downloaded via IMAP,
+the first item is special, and has to remain as the first one in the
+mailbox, even if it's not the oldest. The initial message looks
+something like this:
+
+@smallexample
+From MAILER-DAEMON Thu Jan  4 11:30:38 2018
+Date: 04 Jan 2018 11:35:38 -0700
+From: Mail System Internal Data <MAILER-DAEMON@@frenzy.freefriends.org>
+Subject: DON'T DELETE THIS MESSAGE -- FOLDER INTERNAL DATA
+Message-ID: <1515090938@@frenzy.freefriends.org>
+X-IMAP: 1490643014 0000005528
+Status: RO
+
+This text is part of the internal format of your mail folder, and is not
+a real message.  It is created automatically by the mail system software.
+If deleted, important folder data will be lost, and it will be re-created
+with the data reset to initial values.
+@end smallexample
+
+The option is @option{-k} (``keep'') to avoid conflict with
+any (currently) existing @command{gawk} option.
+
+@<First item remains first option@>=
+if (ARGV[i] == "-k") {
+	Keep_first = TRUE
+	delete ARGV[i]
+}
+@
+
+@<Initialize other variables@>=
+Keep_first = FALSE
+@
+
+
 @node Collecting Lines
 @section Collecting Lines
 
@@ -442,7 +562,21 @@ the body of each message as a single string using string concatentation
 than to store each line of each body's message as a separate array
 element.
 
+If we are treating the first message specially, collect it
+and store it off in separate variables.
+
 @<Collect mailbox lines, build @code{Header} and @code{Body} arrays@>=
+NR == 1 && Keep_first {
+	First_message = $0
+	while ((getline Line) > 0) {
+		if (Line ~ /^From /) {
+			$0 = Line
+			break	#	fall into next rule
+		}
+		First_message = First_message "\n" Line
+	}
+}
+
 {
 	Line = $0
 	if (Line ~ /^From /) {
@@ -703,7 +837,6 @@ all threads.
 @menu
 * Summary of each variable::    Remembering what each array holds.
 * Dumping the data itself::     Actually dumping the data.
-* Dumping thread summaries::    Dumping a thread summary.
 @end menu
 
 @node Summary of each variable
@@ -739,6 +872,9 @@ size to the input (unless duplicates were removed),
 with the same number of messages.
 
 @<Dump the data@>=
+if (Keep_first)
+	print First_message
+
 for (i = 1; i <= MessageNum; i++) {
 	k = Thread[SortedThread[i]]
 	for (j = 1; j in Header[k]; j++) {
@@ -754,64 +890,6 @@ Previous versions sent the output to a file with a fixed
 name.  That was a flaw. This version corrects it, returning to
 basic @cite{Software Tools} principles, and prints the results
 to standard output.
-
-@node Dumping thread summaries
-@subsection Dumping a thread summary
-
-When I get really behind on my mail, I start to want a list of the threads
-in my inbox.  To allow for this, we will add a @option{-s @var{file}} option.
-
-@<Process options@>=
-if (ARGV[1] == "-s" && (2 in ARGV)) {
-	Thread_summary_file = ARGV[2]
-	delete ARGV[1]
-	delete ARGV[2]
-}
-@
-
-We need the @code{Thread_summary_file} variable:
-
-@<Initialize other variables@>=
-Thread_summary_file = ""
-@
-
-The @code{dump_summary()} function dumps the thread summary.
-It splits the information for the first message in each thread
-apart, formats it nicely, and prints it.
-
-@<Support Functions@>=
-function dump_summary(messagenum, from, thread_info,
-					  t, n, subj)
-{
-	# thread_info is in the form
-	# <first date> SUBSEP <subject> SUBSEP <actual date> SUBSEP <message-id>
-	sub(/^[Ff]rom:[[:space:]]*/, "", from)
-	n = split(thread_info, t, SUBSEP)
-	subj = t[2]
-	if (subj != Last_summary_subject)
-	{
-		printf("%-5d \"%-25.25s\" %-33.33s %s\n",
-			messagenum,
-			subj,
-			from,
-			strftime("%Y-%m-%d", t[1])) > Thread_summary_file
-		Last_summary_subject = subj
-	}
-}
-@
-
-We also need the @code{Last_summary_subject} variable:
-
-@<Initialize other variables@>=
-Last_summary_subject = ""
-@
-
-It's good practice to clean things up at the end.
-
-@<Close thread summary file@>=
-if (Thread_summary_file != "")
-	close(Thread_summary_file)
-@
 
 @node Debugging Code
 @section Debugging Print Statements

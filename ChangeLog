@@ -1,3 +1,11 @@
+2018-01-14         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Update copyright year and bump version.
+	Rework command line arguments to not conflict with gawk's:
+	-T prints the thread summary and new -k option keeps the
+	first message first, which is needed for IMAP mailboxes.
+	Implement the -k functionality.
+
 2018-01-12         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Improve the vim mode line. When computing

@@ -5,7 +5,7 @@
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -39,10 +39,29 @@ BEGIN {
 	body = ""
 	Thread_summary_file = ""
 	Last_summary_subject = ""
-	if (ARGV[1] == "-s" && (2 in ARGV)) {
-		Thread_summary_file = ARGV[2]
-		delete ARGV[1]
-		delete ARGV[2]
+	Keep_first = FALSE
+	for (i = 1; i < ARGC; i++) {
+		if (ARGV[i] == "-T" && ((i+1) in ARGV)) {
+			Thread_summary_file = ARGV[i+1]
+			delete ARGV[i]
+			delete ARGV[i+1]
+			++i		# skip over file name in the loop
+		}
+		if (ARGV[i] == "-k") {
+			Keep_first = TRUE
+			delete ARGV[i]
+		}
+	}
+}
+
+NR == 1 && Keep_first {
+	First_message = $0
+	while ((getline Line) > 0) {
+		if (Line ~ /^From /) {
+			$0 = Line
+			break	#	fall into next rule
+		}
+		First_message = First_message "\n" Line
 	}
 }
 
@@ -165,6 +184,9 @@ END {
 		if (Debug ~ /exit/)
 			exit 0
 	}
+	if (Keep_first)
+		print First_message
+	
 	for (i = 1; i <= MessageNum; i++) {
 		k = Thread[SortedThread[i]]
 		for (j = 1; j in Header[k]; j++) {
