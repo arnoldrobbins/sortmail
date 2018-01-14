@@ -1,3 +1,8 @@
+2018-01-12         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Improve the vim mode line. When computing
+	the date, add zero to the various values to force numeric type.
+
 2016-09-27         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Add a -s option for creating a thread

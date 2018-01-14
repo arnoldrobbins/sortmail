@@ -205,33 +205,33 @@ function compute_date(date_rec,		fields, year, month, day,
 	if (fields[2] ~ /Sun|Mon|Tue|Wed|Thu|Fri|Sat/) {
 		if ($6 == "at") {
 			# Date: Thu, Apr 26, 2012 at 7:04 AM
-			year = fields[5]
+			year = fields[5] + 0
 			month = Month[fields[3]]
 			day = fields[4] + 0
-			hour = fields[7]
+			hour = fields[7] + 0
 			if (tolower(fields[9]) == "pm")
 				hour += 12
-			min = fields[8]
+			min = fields[8] + 0
 			sec = 0
 			tzoff = 0
 		} else {
 			# Date: Thu, 05 Jan 2006 17:11:26 -0500
-			year = fields[5]
+			year = fields[5] + 0
 			month = Month[fields[4]]
 			day = fields[3] + 0
-			hour = fields[6]
-			min = fields[7]
-			sec = fields[8]
+			hour = fields[6] + 0
+			min = fields[7] + 0
+			sec = fields[8] + 0
 			tzoff = fields[9] + 0
 		}
 	} else {
 		# Date: 05 Jan 2006 17:11:26 -0500
-		year = fields[4]
+		year = fields[4] + 0
 		month = Month[fields[3]]
 		day = fields[2] + 0
-		hour = fields[5]
-		min = fields[6]
-		sec = fields[7]
+		hour = fields[5] + 0
+		min = fields[6] + 0
+		sec = fields[7] + 0
 		tzoff = fields[8] + 0
 	}
 	if (tolower(tzoff) == "gmt")
