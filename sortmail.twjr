@@ -877,7 +877,7 @@ if (Keep_first)
 
 for (i = 1; i <= MessageNum; i++) {
 	k = Thread[SortedThread[i]]
-	for (j = 1; j in Header[k]; j++) {
+	for (j = 1; k in Header && j in Header[k]; j++) {
 		print Header[k][j]
 		if (Thread_summary_file && Header[k][j] ~ /^[Ff]rom: /)
 			dump_summary(i, Header[k][j], SortedThread[i])
@@ -890,6 +890,14 @@ Previous versions sent the output to a file with a fixed
 name.  That was a flaw. This version corrects it, returning to
 basic @cite{Software Tools} principles, and prints the results
 to standard output.
+
+The check @samp{k in Header} before the check @samp{j in Header[k]}
+is important.  If a duplicate was removed, all but the last instance
+of the duplicated message will not have their message numbers stored
+in @code{Header}.  Without this check, when @code{Header[k]} is
+checked, it first automatically springs into existence, but @emph{as a
+scalar}. @command{gawk} then dies with a fatal message about attempting
+to use a scalar as an array.
 
 @node Debugging Code
 @section Debugging Print Statements

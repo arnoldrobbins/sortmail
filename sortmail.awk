@@ -189,7 +189,7 @@ END {
 	
 	for (i = 1; i <= MessageNum; i++) {
 		k = Thread[SortedThread[i]]
-		for (j = 1; j in Header[k]; j++) {
+		for (j = 1; k in Header && j in Header[k]; j++) {
 			print Header[k][j]
 			if (Thread_summary_file && Header[k][j] ~ /^[Ff]rom: /)
 				dump_summary(i, Header[k][j], SortedThread[i])

@@ -1,3 +1,8 @@
+2018-01-17         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr(Dumping the data itself): Avoid problems
+	if there were duplicate messages.
+
 2018-01-14         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Update copyright year and bump version.
