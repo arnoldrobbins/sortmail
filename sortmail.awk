@@ -322,7 +322,7 @@ function canonacalize_subject(subj_line)
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
-	gsub(/\n/, "", subj_line)				# merge multiple lines
+	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
@@ -330,7 +330,7 @@ function canonacalize_subject(subj_line)
 }
 function decode(string,		pat_b, pat_q, full_pat, data, front, back)
 {
-	full_pat = "(.*)\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
+	full_pat = "(.*)=\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
 	front = gensub(full_pat, "\\1", 1, string)
 	back = gensub(full_pat, "\\2", 1, string)
 	pat_b = ".*=\\?[^?=]+\\?[Bb]\\?(.{4,})\\?=.*"

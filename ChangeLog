@@ -1,5 +1,10 @@
 2018-11-10         Arnold D. Robbins     <arnold@skeeve.com>
 
+	* sortmail.twjr: Fix decoding of subject lines. Bump version
+	to 1.5.
+
+2018-11-10         Arnold D. Robbins     <arnold@skeeve.com>
+
 	* jrweave, jrtangle: New files. Include them in Git.
 	* Makefile: Use ./jrweare, ./jrtangle to build. Comment out
 	building of sortmail-fop.pdf. Add distclean target.

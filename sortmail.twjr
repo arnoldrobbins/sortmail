@@ -20,7 +20,7 @@
 
 @c These apply across the board.
 @set UPDATE-MONTH November, 2018
-@set EDITION 1.4.1
+@set EDITION 1.5
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -1203,7 +1203,7 @@ function canonacalize_subject(subj_line)
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
-	gsub(/\n/, "", subj_line)				# merge multiple lines
+	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
@@ -1280,7 +1280,7 @@ This step saves the text around the encoded data, typically the
 header name (@samp{Subject:}), and any trailing whitespace:
 
 @<Extract front and back parts of the line and save for later@>=
-full_pat = "(.*)\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
+full_pat = "(.*)=\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
 front = gensub(full_pat, "\\1", 1, string)
 back = gensub(full_pat, "\\2", 1, string)
 @
