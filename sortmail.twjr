@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH January, 2018
-@set EDITION 1.4
+@set UPDATE-MONTH November, 2018
+@set EDITION 1.4.1
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -204,6 +204,10 @@ mailbox files by thread.
 * Compute date::                Compute the date.
 * Month days::                  Return the number of days in a given month.
 * Canonicalize subject::        Canonicalize the @samp{Subject:} line.
+* Decode headers::              Decode base64 and quoted-printable encodings.
+* Encodings::                   What encoded lines look like.
+* Decoding Base64::             Decoding Base64 encoded lines.
+* Decoding QP::                 Decoding Quoted-Printable encoded lines.
 * File Definitions::            Source files by definition.
 * Code Chunk Definitions::      Code chunks by definition.
 * Code Chunk References::       Code chunks by reference.
@@ -315,6 +319,7 @@ rule, and support functions.
 * Debugging Code::              Debugging code all in one place.
 @end menu
 
+@post_create sortmail.awk chmod +x sortmail.awk
 @(sortmail.awk@)=
 @<Leading comments and license@>
 
@@ -672,15 +677,27 @@ for (j = 1; j in Header[i]; j++) {
 @subsubsection Collecting The @samp{Subject:} Line
 
 The @samp{Subject:} line needs care. If it's continued, it must
-be collected fully. The loop does that, building up the full
-line in @code{subj_line}. The @code{canonacalize_subject()}
+be collected fully. This is done with a loop, building up the full
+line in @code{subj_line}.
+
+There is an additional wrinkle. Header lines can be encoded in
+different character encodings besides ASCII.  When encoded,
+they may use either Base64 encoding (@strong{FIXME: reference})
+or a modified version of Quoted-Printable encoding
+(@strong{FIXME: reference}).  We have to decode these lines
+before comparing them; we've seen cases where different messages
+in the same thread came in with both encoded and unencoded @samp{Subject:}
+lines!  The decoding is done by the @code{decode()} function
+(@strong{@@pxref here}).
+
+The @code{canonacalize_subject()}
 function (@pxref{Canonicalize subject}) converts the collected
 line into a ``canonical'' form so that it can be used as a sort key:
 
 @<Process the @code{Subject:} line@>=
-subj_line = Header[i][j]
+subj_line = decode(Header[i][j])
 for (k = j + 1; k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
-	subj_line = subj_line "\n" Header[i][k]
+	subj_line = subj_line "\n" decode(Header[i][k])
 Subject[i] = canonacalize_subject(subj_line)
 @
 
@@ -974,12 +991,14 @@ if (Debug) {
 * Compute date::                Compute the date.
 * Month days::                  Return the number of days in a given month.
 * Canonicalize subject::        Canonicalize the @samp{Subject:} line.
+* Decode headers::              Decode base64 and quoted-printable encodings.
 @end menu
 
 @<Support Functions@>=
 @<Turn the date into a timestamp@>
 @<Compute the days in the given month for the given year@>
 @<Canonicalize subject line@>
+@<Decode encoded headings@>
 @
 
 @node Compute date
@@ -1184,7 +1203,7 @@ function canonacalize_subject(subj_line)
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
-	gsub(/\n/, " ", subj_line)				# merge multiple lines
+	gsub(/\n/, "", subj_line)				# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
@@ -1192,6 +1211,274 @@ function canonacalize_subject(subj_line)
 }
 @
 @use_example
+
+@node Decode headers
+@section Decoding Base64 and Quoted-Printable Encodings
+
+In this @value{SECTION} we will look at how to decode encoded headers.
+
+@menu
+* Encodings::                   What encoded lines look like.
+* Decoding Base64::             Decoding Base64 encoded lines.
+* Decoding QP::                 Decoding Quoted-Printable encoded lines.
+@end menu
+
+@node Encodings
+@subsection What Encoded Lines Look Like
+
+@c https://en.wikipedia.org/wiki/Quoted-printable
+@c https://en.wikipedia.org/wiki/MIME#Encoded-Word
+
+As part of updates to the Internet mail standards
+(see @uref{https://tools.ietf.org/html/rfc2047, RFC 2047}),
+it's possible for the data in
+header lines to be encoded using 7-bit ASCII characters.
+Such a line might look like this:
+
+@smallexample
+Subject: =?UTF-8?B?UmU6IElzIGEgRlNGIGNvcHlyaWdodCBhc3NpZ25tZW50IHJlcXVpcmVkIHRvIGNvbnRyaQ==?=
+        =?UTF-8?B?YnV0ZSB0byBnYXdr?=
+@end smallexample
+
+In this example, the encoded value is delimited by @samp{=?}
+and @samp{?=}.  The character set is @samp{UTF-8} (any known, standard
+character set is allowed), and the encoding is Base64 (denoted by
+the @code{B} between the question marks).
+The Quoted-Printable encoding is also valid; it would
+be denoted by a @code{Q}. Letter case is irrelevant in the character
+set name, the encoding indicator, and in Base64 data.
+
+This example shows a @samp{Subject:} line that is continued,
+where the continuation is also encoded. We have to be able to handle
+this case as well.
+
+The @code{decode()} function decodes the encoded part of the
+incoming line based on the encoding indicator, rebuilds the full
+line, and returns the result. If there is no encoded data, it returns
+the original line.
+
+@<Decode encoded headings@>=
+function decode(string,		pat_b, pat_q, full_pat, data, front, back)
+{
+	@<Extract front and back parts of the line and save for later@>
+	@<Encoding Patterns@>
+
+	if (string ~ pat_b) {
+		data = gensub(pat_b, "\\1", 1, string)
+		data = decode_base64(data)
+		string = front data back
+	} else if (string ~ pat_q) {
+		data = gensub(pat_q, "\\1", 1, string)
+		data = decode_quoted_printable(data)
+		string = front data back
+	}
+	return string
+}
+@
+
+This step saves the text around the encoded data, typically the
+header name (@samp{Subject:}), and any trailing whitespace:
+
+@<Extract front and back parts of the line and save for later@>=
+full_pat = "(.*)\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
+front = gensub(full_pat, "\\1", 1, string)
+back = gensub(full_pat, "\\2", 1, string)
+@
+
+These patterns let us detect which encoding is used and pull
+out the actual encoded data with @code{gensub()}.
+Base64 data comes in multiples of four characters (or should, anyway);
+Quoted-Printable data doesn't have such a restriction.
+The doubled backslashes are needed here to get a single backslash
+into the string, in order to escape the @code{?}, which is regular
+expression metacharacter:
+
+@<Encoding Patterns@>=
+pat_b = ".*=\\?[^?=]+\\?[Bb]\\?(.{4,})\\?=.*"
+pat_q = ".*=\\?[^?=]+\\?[Qq]\\?(.*)\\?=.*"
+@
+
+@node Decoding Base64
+@subsection Decoding Base64--encoded Lines
+
+Since the whole program is written in @command{awk}, we need
+an implementation of the Base64 decoding algorithm that is also
+written in @command{awk}.
+
+In the 21st century, we have the Internet; chances are good that
+someone has already done this.  And indeed, after searching, we
+found @uref{https://github.com/shane-kerr/AWK-base64decode,
+this implementation}, which is described in detail in
+@uref{https://dnshane.wordpress.com/2017/03/10/decoding-base64-in-awk/,
+this blog post}.
+
+The original code is portable to any version of @command{awk}.
+After reviewing it some, I chose to modify the code, since it needs
+to return the decoded string instead of printing it. While I was at it,
+I chose to take advantage of features available in @command{gawk}.
+Here's the result:
+
+@<Decode encoded headings@>=
+# The script implements Base64 decoding, based on RFC 3548:
+#
+# https://tools.ietf.org/html/rfc3548
+#
+# It is heavily modified from
+# https://github.com/shane-kerr/AWK-base64decode
+# See https://dnshane.wordpress.com/2017/03/10/decoding-base64-in-awk/
+# for a description of the algorithm and the original code.
+
+# create our lookup table
+BEGIN {
+	# Letters and digits
+	lets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+	       "abcdefghijklmnopqrstuvwxyz0123456789"
+	split(lets, l, "")
+	for (i in l)
+		BASE64[l[i]] = i - 1
+
+	# and finally our two additional characters
+	BASE64["+"] = 62
+	BASE64["/"] = 63
+	# also add in our padding character
+	BASE64["="] = -1
+}
+
+
+function decode_base64(encoded,
+						result, data, i, total, g0, g1, g2, g3) # locals
+{
+	result = ""
+
+	total = split(encoded, data, "")
+	for (i = 1; i + 3 <= total; i += 4) {
+		g0 = BASE64[data[i + 0]]
+		g1 = BASE64[data[i + 1]]
+		g2 = BASE64[data[i + 2]]
+		g3 = BASE64[data[i + 3]]
+
+		check(g0, data[i + 0], i + 0)
+		check(g1, data[i + 1], i + 1)
+		check(g2, data[i + 2], i + 2)
+		check(g3, data[i + 3], i + 3)
+
+		result = result sprintf("%c", lshift(g0, 2) + rshift(g1, 4))
+		if (g2 != -1) {
+			result = result sprintf("%c", lshift(and(g1, 0xF), 4) + \
+											rshift(g2, 2))
+			if (g3 != -1) {
+					result = result sprintf("%c",
+										lshift(and(g2, 0x3), 6) + g3)
+			}
+		}
+	}
+	if (i < remaining) {
+		printf("Extra characters at end of Base 64 encoded string:" \
+				"\"%s\"\n",
+				substr(encoded, i)) > "/dev/stderr"
+		exit 1
+	}
+
+	return result
+}
+@
+
+The @code{check()} function avoids code duplication. I have added
+additional debugging information to the original code's error message.
+The original code noted that using @code{exit} isn't necessarily right
+for all situations. It remains here, but is probably not the best
+thing to do.
+
+@<Decode encoded headings@>=
+function check(out, inc, pos)
+{
+	if (out == "") {
+		printf("Unrecognized character %c (%c @ %d) " \
+				"in Base 64 encoded string\n",
+						out, inc, pos) > "/dev/stderr"
+		exit 1
+	}
+}
+@
+
+The Base64 encoding uses printable characters to hold values between zero
+and 63. Such values contain up to 6 bits of information. Thus four encoded
+bytes hold three bytes of (possibly binary) data.  The bit-fiddling
+restores the data, as shown in @ref{figure-decoded-bits}.
+The numbers indicate which original encoded character
+was the source of the given sets of bits. The doubled lines demarcate
+the original values as well:
+
+@float Figure,figure-decoded-bits
+@caption{The bits after decoding}
+@example
++-===========-====+========-========+====-===========-+
+| 1 1 1 1 1 1 2 2 | 2 2 2 2 3 3 3 3 | 3 3 4 4 4 4 4 4 |
++-===========-====+========-========+====-===========-+
+      Byte 1             Byte 2            Byte 3
+@end example
+@end float
+
+@node Decoding QP
+@subsection Decoding Quoted-Printable--encoded Lines
+
+Quoted-Printable encoding leaves most characters alone, but encodes
+characters that are not printable or not ASCII. The encoding is simple;
+such encoded characters consist of an @samp{=} character followed by
+two hexadecimal digits. For example:
+
+@example
+$ @kbd{printf 'hi\001there\n' | mimencode -q}
+@print{} hi=01there
+@end example
+
+The first step in being able to decode these strings is to be
+able to map hexadecimal digits to integers. This rule sets
+up such a table in the @code{Hex} array. By using @code{toupper()}
+we arrange that both uppercase and lowercase hexadecimal digits will
+work correctly.
+
+@<Decode encoded headings@>=
+BEGIN {
+	hexdigs = "0123456789abcdef"
+	n = split(hexdigs, h, "")
+	for (i = 1; i <= n; i++)
+		Hex[toupper(h[i])] = hex[h[i]] = i - 1;
+
+}
+@
+
+Decoding the data is relatively straightforward, given the extended
+version of the @code{split()} function in @command{gawk}. We split
+on occurrences of @samp{=} followed by two hexadecimal digits. The
+values are stored in the @code{seps} array and the intervening text
+in the @code{parts} array.
+
+We can then reassemble the line, converting the encoded data to
+a real character as we go:
+
+@page
+@<Decode encoded headings@>=
+function decode_quoted_printable(data,
+						n, i, parts, seps, result, converted) # locals
+{
+	if (index(data, "=") == 0)	# no encoded characters
+		return data
+
+	n = split(data, parts, /=[[:xdigit:]]{2}/, seps)
+	result = seps[0]	# real or ""
+	for (i = 1; i in parts; i++) {
+		converted = ""
+		if (i in seps)
+			converted = sprintf("%c",
+					Hex[substr(seps[i], 2)] * 16 + \
+					Hex[substr(seps[i], 3)])
+
+		result = result parts[i] converted
+	}
+	return result
+}
+@
 
 @node Code Chunk Summaries
 @appendix Code Chunk Summaries

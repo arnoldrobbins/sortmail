@@ -98,9 +98,9 @@ END {
 			if (Header[i][j] ~ /^[Dd]ate: /) {
 				Date[i] = compute_date(Header[i][j])
 			} else if (Header[i][j] ~ /^[Ss]ubject: /) {
-				subj_line = Header[i][j]
+				subj_line = decode(Header[i][j])
 				for (k = j + 1; k in Header[i] && Header[i][k] ~ /^[[:space:]]/; k++)
-					subj_line = subj_line "\n" Header[i][k]
+					subj_line = subj_line "\n" decode(Header[i][k])
 				Subject[i] = canonacalize_subject(subj_line)
 			} else if (Header[i][j] ~ /^[Mm]essage-[Ii][Dd]: */) {
 				message_id_line = Header[i][j]
@@ -322,9 +322,125 @@ function canonacalize_subject(subj_line)
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
-	gsub(/\n/, " ", subj_line)				# merge multiple lines
+	gsub(/\n/, "", subj_line)				# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
 	return subj_line						# return the result
+}
+function decode(string,		pat_b, pat_q, full_pat, data, front, back)
+{
+	full_pat = "(.*)\\?[^?=]+\\?[BbQq]\\?.*\\?=(.*)"
+	front = gensub(full_pat, "\\1", 1, string)
+	back = gensub(full_pat, "\\2", 1, string)
+	pat_b = ".*=\\?[^?=]+\\?[Bb]\\?(.{4,})\\?=.*"
+	pat_q = ".*=\\?[^?=]+\\?[Qq]\\?(.*)\\?=.*"
+
+	if (string ~ pat_b) {
+		data = gensub(pat_b, "\\1", 1, string)
+		data = decode_base64(data)
+		string = front data back
+	} else if (string ~ pat_q) {
+		data = gensub(pat_q, "\\1", 1, string)
+		data = decode_quoted_printable(data)
+		string = front data back
+	}
+	return string
+}
+# The script implements Base64 decoding, based on RFC 3548:
+#
+# https://tools.ietf.org/html/rfc3548
+#
+# It is heavily modified from
+# https://github.com/shane-kerr/AWK-base64decode
+# See https://dnshane.wordpress.com/2017/03/10/decoding-base64-in-awk/
+# for a description of the algorithm and the original code.
+
+# create our lookup table
+BEGIN {
+	# Letters and digits
+	lets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+	       "abcdefghijklmnopqrstuvwxyz0123456789"
+	split(lets, l, "")
+	for (i in l)
+		BASE64[l[i]] = i - 1
+
+	# and finally our two additional characters
+	BASE64["+"] = 62
+	BASE64["/"] = 63
+	# also add in our padding character
+	BASE64["="] = -1
+}
+
+
+function decode_base64(encoded,
+						result, data, i, total, g0, g1, g2, g3) # locals
+{
+	result = ""
+
+	total = split(encoded, data, "")
+	for (i = 1; i + 3 <= total; i += 4) {
+		g0 = BASE64[data[i + 0]]
+		g1 = BASE64[data[i + 1]]
+		g2 = BASE64[data[i + 2]]
+		g3 = BASE64[data[i + 3]]
+
+		check(g0, data[i + 0], i + 0)
+		check(g1, data[i + 1], i + 1)
+		check(g2, data[i + 2], i + 2)
+		check(g3, data[i + 3], i + 3)
+
+		result = result sprintf("%c", lshift(g0, 2) + rshift(g1, 4))
+		if (g2 != -1) {
+			result = result sprintf("%c", lshift(and(g1, 0xF), 4) + \
+											rshift(g2, 2))
+			if (g3 != -1) {
+					result = result sprintf("%c",
+										lshift(and(g2, 0x3), 6) + g3)
+			}
+		}
+	}
+	if (i < remaining) {
+		printf("Extra characters at end of Base 64 encoded string:" \
+				"\"%s\"\n",
+				substr(encoded, i)) > "/dev/stderr"
+		exit 1
+	}
+
+	return result
+}
+function check(out, inc, pos)
+{
+	if (out == "") {
+		printf("Unrecognized character %c (%c @ %d) " \
+				"in Base 64 encoded string\n",
+						out, inc, pos) > "/dev/stderr"
+		exit 1
+	}
+}
+BEGIN {
+	hexdigs = "0123456789abcdef"
+	n = split(hexdigs, h, "")
+	for (i = 1; i <= n; i++)
+		Hex[toupper(h[i])] = hex[h[i]] = i - 1;
+
+}
+function decode_quoted_printable(data,
+						n, i, parts, seps, result, converted) # locals
+{
+	if (index(data, "=") == 0)	# no encoded characters
+		return data
+
+	n = split(data, parts, /=[[:xdigit:]]{2}/, seps)
+	result = seps[0]	# real or ""
+	for (i = 1; i in parts; i++) {
+		converted = ""
+		if (i in seps)
+			converted = sprintf("%c",
+					Hex[substr(seps[i], 2)] * 16 + \
+					Hex[substr(seps[i], 3)])
+
+		result = result parts[i] converted
+	}
+	return result
 }
