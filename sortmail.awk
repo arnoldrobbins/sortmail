@@ -5,7 +5,7 @@
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -315,13 +315,14 @@ function days_in_month(month, year)
 
 	return 28
 }
-# canonacalize_subject --- trim out "Re:", white space
+# canonacalize_subject --- trim out "Re:", "fw:", "fwd:", white space
 
 function canonacalize_subject(subj_line)
 {
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
+	sub(/^((fwd?): *)+/, "", subj_line)		# remove "fw:" and "fwd:" (forward)
 	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace

@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH November, 2018
-@set EDITION 1.5
+@set UPDATE-MONTH March, 2019
+@set EDITION 1.6
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -93,19 +93,19 @@ ISRAEL
 Email: <email>arnold@@skeeve.com</email>
 URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
 
-<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018, 2019
 Arnold David Robbins
 All Rights Reserved.</literallayout>
 @end docbook
 
 @ifnotdocbook
-Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018 @*
+Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019 @*
 Arnold David Robbins @*
 All Rights Reserved.
 @end ifnotdocbook
 @sp 1
 The @command{sortmail} program is copyright
-@copyright{} 2007, 2008, 2011, 2015, 2016, 2018 by Arnold David Robbins.
+@copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019 by Arnold David Robbins.
 It is published under
 the conditions of the GNU General Public License, version 3.
 @sp 1
@@ -350,7 +350,7 @@ END {
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019 Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -1196,13 +1196,14 @@ each line of code explain what that line is doing:
 
 @use_smallexample
 @<Canonicalize subject line@>=
-# canonacalize_subject --- trim out "Re:", white space
+# canonacalize_subject --- trim out "Re:", "fw:", "fwd:", white space
 
 function canonacalize_subject(subj_line)
 {
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
+	sub(/^((fwd?): *)+/, "", subj_line)		# remove "fw:" and "fwd:" (forward)
 	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
