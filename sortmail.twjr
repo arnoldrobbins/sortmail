@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH March, 2019
-@set EDITION 1.6
+@set UPDATE-MONTH June, 2019
+@set EDITION 1.7
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -1207,6 +1207,9 @@ function canonacalize_subject(subj_line)
 	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
+
+	if (subj_line ~ /^[[:space:]]*$/)		# only Re:, Fw:, Fwd:, etc
+		subj_line = "<<<EMPTY>>>"
 
 	return subj_line						# return the result
 }

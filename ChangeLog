@@ -1,3 +1,8 @@
+2019-06-14         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: If canonacalized subject is empty, return a
+	marker string so that sorting works. Version updated to 1.7.
+
 2018-11-10         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Fix decoding of subject lines. Bump version

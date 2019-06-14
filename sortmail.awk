@@ -327,6 +327,9 @@ function canonacalize_subject(subj_line)
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
+	if (subj_line ~ /^[[:space:]]*$/)		# only Re:, Fw:, Fwd:, etc
+		subj_line = "<<<EMPTY>>>"
+
 	return subj_line						# return the result
 }
 function decode(string,		pat_b, pat_q, full_pat, data, front, back)
