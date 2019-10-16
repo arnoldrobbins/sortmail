@@ -441,8 +441,8 @@ function decode_quoted_printable(data,
 		converted = ""
 		if (i in seps)
 			converted = sprintf("%c",
-					Hex[substr(seps[i], 2)] * 16 + \
-					Hex[substr(seps[i], 3)])
+					Hex[substr(seps[i], 2, 1)] * 16 + \
+					Hex[substr(seps[i], 3, 1)])
 
 		result = result parts[i] converted
 	}

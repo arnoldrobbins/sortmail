@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH June, 2019
-@set EDITION 1.7
+@set UPDATE-MONTH October, 2019
+@set EDITION 1.8
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -682,13 +682,15 @@ line in @code{subj_line}.
 
 There is an additional wrinkle. Header lines can be encoded in
 different character encodings besides ASCII.  When encoded,
-they may use either Base64 encoding (@strong{FIXME: reference})
+they may use either Base64 encoding
+(see @url{https://tools.ietf.org/html/rfc3548, RFC 3548})
 or a modified version of Quoted-Printable encoding
-(@strong{FIXME: reference}).  We have to decode these lines
+(see @url{https://en.wikipedia.org/wiki/Quoted-printable, the Wikipedia article}).
+We have to decode these lines
 before comparing them; we've seen cases where different messages
 in the same thread came in with both encoded and unencoded @samp{Subject:}
 lines!  The decoding is done by the @code{decode()} function
-(@strong{@@pxref here}).
+(@pxref{Encodings}).
 
 The @code{canonacalize_subject()}
 function (@pxref{Canonicalize subject}) converts the collected
@@ -1475,8 +1477,8 @@ function decode_quoted_printable(data,
 		converted = ""
 		if (i in seps)
 			converted = sprintf("%c",
-					Hex[substr(seps[i], 2)] * 16 + \
-					Hex[substr(seps[i], 3)])
+					Hex[substr(seps[i], 2, 1)] * 16 + \
+					Hex[substr(seps[i], 3, 1)])
 
 		result = result parts[i] converted
 	}

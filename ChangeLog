@@ -1,3 +1,9 @@
+2019-10-16         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Fix a bug in base64 decoding. Fix some FIXMEs
+	and add some references and a cross reference. Version updated
+	to 1.8.
+
 2019-06-14         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: If canonacalized subject is empty, return a
