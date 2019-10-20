@@ -1,3 +1,8 @@
+2019-10-20         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr (canonicalize_subject): Fix a bug: Turn
+	"\n[[:space:]]+" into " ", not "".
+
 2019-10-16         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr: Fix a bug in quoted printable decoding. Fix

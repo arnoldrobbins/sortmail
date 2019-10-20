@@ -323,7 +323,7 @@ function canonacalize_subject(subj_line)
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
 	sub(/^((re|sv): *)+/, "", subj_line)	# remove "re:" (sv: for sweden)
 	sub(/^((fwd?): *)+/, "", subj_line)		# remove "fw:" and "fwd:" (forward)
-	gsub(/\n[[:space:]]+/, "", subj_line)	# merge multiple lines
+	gsub(/\n[[:space:]]+/, " ", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
 
