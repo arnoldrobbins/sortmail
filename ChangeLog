@@ -1,3 +1,7 @@
+2020-10-14         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* sortmail.twjr: Fix a small typo.
+
 2019-10-20         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* sortmail.twjr (canonicalize_subject): Fix a bug: Turn

@@ -167,7 +167,7 @@ URL: @url{http://www.skeeve.com/} @*
 @c node, in `unnumbered' sections, then the introductory chapter.
 @c Licensing nodes are appendices, they're not central to TexiWebJr.
 
-This file documents @code{sortmail}, a program that sort Unix
+This file documents @code{sortmail}, a program that sorts Unix
 mailbox files by thread.
 
 @insertcopying
