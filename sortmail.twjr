@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH October, 2019
-@set EDITION 1.8
+@set UPDATE-MONTH March, 2021
+@set EDITION 1.9
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -93,19 +93,19 @@ ISRAEL
 Email: <email>arnold@@skeeve.com</email>
 URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
 
-<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018, 2019
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021
 Arnold David Robbins
 All Rights Reserved.</literallayout>
 @end docbook
 
 @ifnotdocbook
-Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019 @*
+Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021 @*
 Arnold David Robbins @*
 All Rights Reserved.
 @end ifnotdocbook
 @sp 1
 The @command{sortmail} program is copyright
-@copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019 by Arnold David Robbins.
+@copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021 by Arnold David Robbins.
 It is published under
 the conditions of the GNU General Public License, version 3.
 @sp 1
@@ -350,7 +350,8 @@ END {
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021
+# Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -1074,6 +1075,10 @@ if (fields[2] ~ /Sun|Mon|Tue|Wed|Thu|Fri|Sat/) {
 	sec = fields[7] + 0
 	tzoff = fields[8] + 0
 }
+
+# Date: 14 Oct 20 16:58:26 --- yes really! 2020 comes to us as 20! Grrrr
+if (year < 100)
+	year += 2000
 @
 
 Turn the timezone offset into a number.

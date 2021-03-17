@@ -5,7 +5,8 @@
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019 Arnold David Robbins
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021
+# Arnold David Robbins
 # arnold@skeeve.com
 #
 # Sortmail.awk is free software; you can redistribute it and/or modify
@@ -256,6 +257,10 @@ function compute_date(date_rec,		fields, year, month, day,
 		sec = fields[7] + 0
 		tzoff = fields[8] + 0
 	}
+	
+	# Date: 14 Oct 20 16:58:26 --- yes really! 2020 comes to us as 20! Grrrr
+	if (year < 100)
+		year += 2000
 	if (tolower(tzoff) == "gmt")
 		tzoff = 0
 	# tzoff is usually of form -0200 or +0500 but
