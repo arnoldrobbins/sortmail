@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH March, 2021
-@set EDITION 1.9
+@set UPDATE-MONTH May, 2022
+@set EDITION 1.10
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -93,19 +93,19 @@ ISRAEL
 Email: <email>arnold@@skeeve.com</email>
 URL: <ulink url="http://www.skeeve.com/">http://www.skeeve.com/</ulink></literallayout>
 
-<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021
+<literallayout class="normal">Copyright &copy; 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021, 2022
 Arnold David Robbins
 All Rights Reserved.</literallayout>
 @end docbook
 
 @ifnotdocbook
-Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021 @*
+Copyright @copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021, 2022 @*
 Arnold David Robbins @*
 All Rights Reserved.
 @end ifnotdocbook
 @sp 1
 The @command{sortmail} program is copyright
-@copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021 by Arnold David Robbins.
+@copyright{} 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021, 2022 by Arnold David Robbins.
 It is published under
 the conditions of the GNU General Public License, version 3.
 @sp 1
@@ -564,7 +564,7 @@ arrays than standard @command{awk}'s simulated multidimensional
 subscripts.
 
 Additionally, it turns out to be @emph{much} faster to collect
-the body of each message as a single string using string concatentation
+the body of each message as a single string using string concatenation
 than to store each line of each body's message as a separate array
 element.
 
@@ -648,7 +648,7 @@ for (i = 1; i <= MessageNum; i++) {
 @node Collecting headers
 @subsection Collecting Header Information
 
-RFC 2822 headers are case-independant.  Thus, I really should
+RFC 2822 headers are case-independent.  Thus, I really should
 use @code{tolower()} or @code{toupper()} before doing a regexp match. In
 practice, almost always the first letter is uppercase and the the rest
 are lowercase.  The message ID is an exception; different cases for the
@@ -792,7 +792,7 @@ Sorting the data is simple: prepare the data and then sort it.
 There's a lot of debugging code that probably isn't really needed anymore.
 
 @<Sort the data@>=
-@<Debug: Sorting: Print statisics@>
+@<Debug: Sorting: Print statistics@>
 @<Create @code{Thread} array to sort by thread@>
 @<Sort @code{Thread}, placing the results in @code{SortedThread}@>
 @<Debug: Sorting: Print info on sorted threads@>
@@ -826,7 +826,7 @@ for (i in SubjectDateId) {
 @
 
 Once the @code{Thread} array is set up, with the indices
-identifying both the threads and the earliest occurence of
+identifying both the threads and the earliest occurrence of
 each, it's time to sort the data.  @command{gawk}'s built-in
 @code{asorti()} function does this for us:
 
@@ -958,7 +958,7 @@ if (Debug) {
 }
 @
 
-@<Debug: Sorting: Print statisics@>=
+@<Debug: Sorting: Print statistics@>=
 if (Debug) {
 	printf("length(SubjectDateId) = %d, length(Subject) = %d, length(Date) = %d\n",
 		length(SubjectDateId), length(Subject), length(Date)) > "/dev/stderr"
@@ -1055,6 +1055,20 @@ if (fields[2] ~ /Sun|Mon|Tue|Wed|Thu|Fri|Sat/) {
 		min = fields[8] + 0
 		sec = 0
 		tzoff = 0
+	} else if (fields[3] in Month) {
+		# Date: Wed May 11 16:52:19 BST 2022  [ gag... ]
+		year = fields[9] + 0
+		month = Month[fields[3]]
+		day = fields[4] + 0
+		hour = fields[5] + 0
+		min = fields[6] + 0
+		sec = fields[7] + 0
+		# Ugly special case...
+		if (tzoff == "BST") {
+			tzoff = "+0100"
+			tzoff += 0
+		} else
+			tzoff = fields[8] + 0
 	} else {
 		# Date: Thu, 05 Jan 2006 17:11:26 -0500
 		year = fields[5] + 0

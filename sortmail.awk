@@ -237,6 +237,20 @@ function compute_date(date_rec,		fields, year, month, day,
 			min = fields[8] + 0
 			sec = 0
 			tzoff = 0
+		} else if (fields[3] in Month) {
+			# Date: Wed May 11 16:52:19 BST 2022  [ gag... ]
+			year = fields[9] + 0
+			month = Month[fields[3]]
+			day = fields[4] + 0
+			hour = fields[5] + 0
+			min = fields[6] + 0
+			sec = fields[7] + 0
+			# Ugly special case...
+			if (tzoff == "BST") {
+				tzoff = "+0100"
+				tzoff += 0
+			} else
+				tzoff = fields[8] + 0
 		} else {
 			# Date: Thu, 05 Jan 2006 17:11:26 -0500
 			year = fields[5] + 0
