@@ -3,6 +3,7 @@
 	* sortmail.twjr (canonicalize_subject): Tweaking the Subject:
 	header handling.
 	Bump modified date and version number.
+	Update copyright year in program header.
 
 2022-05-19         Arnold D. Robbins     <arnold@skeeve.com>
 

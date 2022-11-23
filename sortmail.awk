@@ -5,7 +5,7 @@
 # time/date and sorting functions but could be made to run on a POSIX awk
 # with some work.
 #
-# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021
+# Copyright (C) 2007, 2008, 2011, 2015, 2016, 2018, 2019, 2020, 2021, 2022
 # Arnold David Robbins
 # arnold@skeeve.com
 #
