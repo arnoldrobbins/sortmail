@@ -340,8 +340,11 @@ function canonacalize_subject(subj_line)
 {
 	subj_line = tolower(subj_line)			# lower case the line
 	sub(/^subject: +/, "", subj_line)		# remove "subject:"
-	sub(/^((re|sv)(\[[0-9]+\])?: *)+/, "", subj_line)	# remove "re:" (sv: for sweden); we've even seen Re[2]:
+	# remove "re:" (sv: for sweden); we've even seen Re[2]:,
+	# "aw" is apparently german
+	sub(/^((re|sv|aw)(\[[0-9]+\])?: *)+/, "", subj_line)
 	sub(/^((fwd?): *)+/, "", subj_line)		# remove "fw:" and "fwd:" (forward)
+	sub(/\(fwd\)[:space:]*$/, "", subj_line)		# remove trailing "(fwd)" (forward)
 	gsub(/\n[[:space:]]+/, " ", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
