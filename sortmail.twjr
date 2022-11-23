@@ -1227,7 +1227,7 @@ function canonacalize_subject(subj_line)
 	# "aw" is apparently german
 	sub(/^((re|sv|aw)(\[[0-9]+\])?: *)+/, "", subj_line)
 	sub(/^((fwd?): *)+/, "", subj_line)		# remove "fw:" and "fwd:" (forward)
-	sub(/\(fwd\)[:space:]*$/, "", subj_line)		# remove trailing "(fwd)" (forward)
+	sub(/\(fwd\)[[:space:]]*$/, "", subj_line)		# remove trailing "(fwd)" (forward)
 	gsub(/\n[[:space:]]+/, " ", subj_line)	# merge multiple lines
 	sub(/[[:space:]]+$/, "", subj_line)		# remove trailing whitespace
 	gsub(/[[:space:]]+/, " ", subj_line)	# collapse multiple whitespace
