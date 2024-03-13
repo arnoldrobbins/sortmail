@@ -441,7 +441,7 @@ function check(out, inc, pos)
 		printf("Unrecognized character %c (%c @ %d) " \
 				"in Base 64 encoded string\n",
 						out, inc, pos) > "/dev/stderr"
-		exit 1
+		# exit 1
 	}
 }
 BEGIN {

@@ -19,8 +19,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH November, 2022
-@set EDITION 1.11
+@set UPDATE-MONTH March, 2024
+@set EDITION 1.12
 
 @set TITLE Sortmail: A Program To Sort Mailboxes
 @set SHORTTITLE Sortmail
@@ -1417,6 +1417,8 @@ The original code noted that using @code{exit} isn't necessarily right
 for all situations. It remains here, but is probably not the best
 thing to do.
 
+In fact, it's not, so it's commented out.
+
 @<Decode encoded headings@>=
 function check(out, inc, pos)
 {
@@ -1424,7 +1426,7 @@ function check(out, inc, pos)
 		printf("Unrecognized character %c (%c @ %d) " \
 				"in Base 64 encoded string\n",
 						out, inc, pos) > "/dev/stderr"
-		exit 1
+		# exit 1
 	}
 }
 @
